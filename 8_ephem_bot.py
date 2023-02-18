@@ -1,57 +1,51 @@
-"""
-Домашнее задание №1
-
-Использование библиотек: ephem
-
-* Установите модуль ephem
-* Добавьте в бота команду /planet, которая будет принимать на вход
-  название планеты на английском, например /planet Mars
-* В функции-обработчике команды из update.message.text получите
-  название планеты (подсказка: используйте .split())
-* При помощи условного оператора if и ephem.constellation научите
-  бота отвечать, в каком созвездии сегодня находится планета.
-
-"""
 import logging
-
+import ephem
+from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO,
-                    filename='bot.log')
+from random import randint
 
+import settings
 
-PROXY = {
-    'proxy_url': 'socks5://t1.learn.python.ru:1080',
-    'urllib3_proxy_kwargs': {
-        'username': 'learn',
-        'password': 'python'
-    }
-}
+now_date = datetime.now()
 
+logging.basicConfig(filename='bot.log', level=logging.INFO)
+
+today = f'{now_date.year}/{now_date.month}/{now_date.day}'
+planets = {'Mars' : ephem.Mars(today), 'Venus' : ephem.Venus(today), 'Mercury' : ephem.Mercury(today), 'Uranus' : ephem.Uranus(today), 'Jupiter' : ephem.Jupiter(today),
+           'Neptune' : ephem.Neptune(today), 'Saturn' : ephem.Saturn(today)} 
 
 def greet_user(update, context):
-    text = 'Вызван /start'
+    print('Вызван /start')
+    print(update)
+    update.message.reply_text('Здравствуй!')
+
+def talk_to_me(update, context):
+    text = update.message.text
     print(text)
     update.message.reply_text(text)
 
-
-def talk_to_me(update, context):
-    user_text = update.message.text
-    print(user_text)
-    update.message.reply_text(text)
-
+def ephem_f(update, context):
+    comand, planet_name = map(str, update.message.text.split())
+    print(planet_name)
+    ephem_try = planets.get(planet_name, '1')
+    if ephem_try != '1': 
+        update.message.reply_text(ephem.constellation(planets[planet_name]))
+    else:
+        update.message.reply_text('Я не знаю такую планету(')
+            
 
 def main():
-    mybot = Updater("КЛЮЧ, КОТОРЫЙ НАМ ВЫДАЛ BotFather", request_kwargs=PROXY, use_context=True)
+    mybot = Updater(settings.API_KEY, use_context=True)
 
     dp = mybot.dispatcher
-    dp.add_handler(CommandHandler("start", greet_user))
+    dp.add_handler(CommandHandler('start', greet_user))
+    dp.add_handler(CommandHandler('planet', ephem_f))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
+    logging.info('Bot started')
     mybot.start_polling()
     mybot.idle()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,20 +1,13 @@
-"""
+questions_and_answers = {"Как дела": "Хорошо!", "Что делаешь?": "Программирую", "Что?": "Что?"}
 
-Домашнее задание №1
-
-Исключения: KeyboardInterrupt
-
-* Перепишите функцию hello_user() из задания while1, чтобы она 
-  перехватывала KeyboardInterrupt, писала пользователю "Пока!" 
-  и завершала работу при помощи оператора break
-    
-"""
-
-def hello_user():
-    """
-    Замените pass на ваш код
-    """
-    pass
-    
+def hello_user(answers_dict):
+    while True:
+        try:
+            question = input('Введите вопрос: ',)
+            print(answers_dict.get(question, "Не знаю"))
+        except KeyboardInterrupt: 
+            print('\nПока')
+            break
+   
 if __name__ == "__main__":
-    hello_user()
+    hello_user(questions_and_answers)
